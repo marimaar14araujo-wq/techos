@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>TechOS — Ordens de Serviço</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#00d4aa">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="TechOS">
+<link rel="apple-touch-icon" href="icons/icon-152.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0c10;--surface:#111418;--surface2:#181c22;--border:#252a32;--accent:#00d4aa;--accent2:#0094ff;--danger:#ff4d6a;--warn:#ffb224;--text:#e8eaf0;--text2:#8892a0;--text3:#4a5568;--radius:10px;--safe-top:env(safe-area-inset-top,0px);--safe-bot:env(safe-area-inset-bottom,0px)}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',sans-serif;min-height:100dvh;overflow-x:hidden;padding-top:var(--safe-top);padding-bottom:var(--safe-bot)}
+body::before{content:'';position:fixed;top:-40%;left:-20%;width:60vw;height:60vw;background:radial-gradient(circle,rgba(0,212,170,0.04) 0%,transparent 70%);pointer-events:none;z-index:0}
+header{background:var(--surface);border-bottom:1px solid var(--border);padding:0 20px;display:flex;align-items:center;justify-content:space-between;height:60px;position:sticky;top:0;z-index:100;backdrop-filter:blur(12px)}
+.logo{display:flex;align-items:center;gap:10px;font-size:1.15rem;font-weight:700;letter-spacing:-0.5px}
+.logo span{color:var(--accent)}
+.logo-icon{width:32px;height:32px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.95rem}
+.header-right{display:flex;align-items:center;gap:10px}
+.stat-pills{display:flex;gap:8px}
+.stat-pill{display:flex;align-items:center;gap:6px;background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 10px;font-size:.75rem;font-family:'JetBrains Mono',monospace}
+.stat-dot{width:7px;height:7px;border-radius:50%}
+.dot-green{background:var(--accent);box-shadow:0 0 5px var(--accent)}
+.dot-gray{background:var(--text3)}
+.btn{display:inline-flex;align-items:center;gap:7px;padding:9px 18px;border-radius:var(--radius);font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:.85rem;cursor:pointer;transition:all .2s;border:none;outline:none}
+.btn-primary{background:linear-gradient(135deg,var(--accent),#00b894);color:#000}
+.btn-primary:hover,.btn-primary:active{transform:translateY(-1px);box-shadow:0 4px 20px rgba(0,212,170,.35)}
+.btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border)}
+.btn-secondary:hover{border-color:var(--accent);color:var(--accent)}
+.btn-danger{background:rgba(255,77,106,.12);color:var(--danger);border:1px solid rgba(255,77,106,.3)}
+.btn-warn{background:rgba(255,178,36,.12);color:var(--warn);border:1px solid rgba(255,178,36,.3)}
+.btn-sm{padding:6px 11px;font-size:.78rem}
+.container{max-width:1100px;margin:0 auto;padding:24px 16px;position:relative;z-index:1}
+.tabs{display:flex;gap:3px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:3px;margin-bottom:20px;width:fit-content}
+.tab{padding:7px 16px;border-radius:7px;cursor:pointer;font-weight:500;font-size:.85rem;color:var(--text2);transition:all .2s;border:none;background:none;font-family:'Space Grotesk',sans-serif}
+.tab.active{background:var(--surface2);color:var(--accent);border:1px solid var(--border)}
+.filter-bar{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap}
+.search-input{flex:1;min-width:200px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:9px 14px;color:var(--text);font-family:'Space Grotesk',sans-serif;font-size:.85rem;outline:none;transition:border .2s}
+.search-input:focus{border-color:var(--accent)}
+.search-input::placeholder{color:var(--text3)}
+select.search-input{cursor:pointer;max-width:170px}
+.os-grid{display:flex;flex-direction:column;gap:10px}
+.os-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px 18px;display:grid;grid-template-columns:72px 1fr auto;align-items:center;gap:14px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
+.os-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px}
+.os-card.status-open::before{background:var(--accent)}
+.os-card.status-closed::before{background:var(--text3)}
+.os-card:hover{border-color:rgba(0,212,170,.3);transform:translateX(2px)}
+.os-number{font-family:'JetBrains Mono',monospace;font-size:.82rem;font-weight:600;color:var(--accent)}
+.os-number small{display:block;font-size:.65rem;color:var(--text3);font-weight:400;margin-top:2px}
+.os-info h3{font-size:.9rem;font-weight:600;margin-bottom:3px}
+.os-info .meta{display:flex;gap:12px;flex-wrap:wrap;font-size:.75rem;color:var(--text2)}
+.badge{padding:3px 10px;border-radius:20px;font-size:.72rem;font-weight:600;letter-spacing:.5px;text-transform:uppercase;white-space:nowrap}
+.badge-open{background:rgba(0,212,170,.12);color:var(--accent);border:1px solid rgba(0,212,170,.3)}
+.badge-closed{background:rgba(72,85,99,.2);color:var(--text3);border:1px solid var(--border)}
+.os-right{display:flex;flex-direction:column;align-items:flex-end;gap:8px}
+.priority-tag{padding:2px 7px;border-radius:4px;font-size:.68rem;font-weight:700;text-transform:uppercase}
+.priority-alta{background:rgba(255,77,106,.12);color:var(--danger)}
+.priority-media{background:rgba(255,178,36,.12);color:var(--warn)}
+.priority-baixa{background:rgba(0,148,255,.12);color:var(--accent2)}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.78);z-index:200;backdrop-filter:blur(4px);align-items:center;justify-content:center;padding:16px}
+.modal-overlay.show{display:flex}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;width:100%;max-width:620px;max-height:92dvh;overflow-y:auto;animation:slideUp .22s ease}
+@keyframes slideUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+.modal-header{padding:20px 24px 16px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:flex-start;position:sticky;top:0;background:var(--surface);z-index:1}
+.modal-header h2{font-size:1.05rem;font-weight:700}
+.modal-header p{font-size:.78rem;color:var(--text2);margin-top:2px}
+.close-btn{background:var(--surface2);border:1px solid var(--border);color:var(--text2);width:30px;height:30px;border-radius:7px;cursor:pointer;font-size:.9rem;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0}
+.close-btn:hover{color:var(--text);border-color:var(--accent)}
+.modal-body{padding:20px 24px}
+.modal-footer{padding:16px 24px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px;position:sticky;bottom:0;background:var(--surface)}
+.form-section{margin-bottom:20px}
+.form-section-title{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--accent);margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.form-section-title::after{content:'';flex:1;height:1px;background:var(--border)}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.form-row.full{grid-template-columns:1fr}
+.form-row.three{grid-template-columns:1fr 1fr 1fr}
+.field{display:flex;flex-direction:column;gap:5px}
+.field label{font-size:.75rem;font-weight:500;color:var(--text2)}
+.field input,.field textarea,.field select{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:9px 11px;color:var(--text);font-family:'Space Grotesk',sans-serif;font-size:.85rem;outline:none;transition:border .2s;width:100%}
+.field input:focus,.field textarea:focus,.field select:focus{border-color:var(--accent)}
+.field textarea{resize:vertical;min-height:72px}
+.field input::placeholder,.field textarea::placeholder{color:var(--text3)}
+.field select{cursor:pointer}
+.detail-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:18px;gap:12px}
+.detail-os-num{font-family:'JetBrains Mono',monospace;font-size:1.3rem;font-weight:700;color:var(--accent)}
+.detail-section{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:12px}
+.detail-section-title{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text3);margin-bottom:10px}
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.detail-item label{font-size:.7rem;color:var(--text3);display:block;margin-bottom:2px}
+.detail-item span{font-size:.85rem;font-weight:500}
+.detail-item.full{grid-column:1/-1}
+.card-actions{display:flex;gap:6px;flex-wrap:wrap}
+#installBanner{display:none;position:fixed;bottom:calc(16px + var(--safe-bot));left:16px;right:16px;background:var(--surface);border:1px solid var(--accent);border-radius:14px;padding:14px 18px;z-index:500;box-shadow:0 8px 30px rgba(0,212,170,.2);animation:slideUp .3s ease}
+#installBanner.show{display:flex;align-items:center;gap:14px}
+.install-text{flex:1}
+.install-text strong{display:block;font-size:.9rem}
+.install-text span{font-size:.78rem;color:var(--text2)}
+.toast{position:fixed;bottom:calc(80px + var(--safe-bot));right:16px;background:var(--surface);border:1px solid var(--accent);border-radius:10px;padding:12px 18px;font-size:.85rem;color:var(--accent);z-index:999;animation:fadeInUp .3s ease;box-shadow:0 8px 24px rgba(0,212,170,.15)}
+@keyframes fadeInUp{from{transform:translateY(10px);opacity:0}to{transform:translateY(0);opacity:1}}
+.empty-state{text-align:center;padding:50px 20px;color:var(--text3)}
+.empty-state .icon{font-size:2.8rem;margin-bottom:14px;opacity:.35}
+.empty-state h3{font-size:.95rem;color:var(--text2);margin-bottom:6px}
+.empty-state p{font-size:.82rem}
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+@media(max-width:600px){.os-card{grid-template-columns:1fr;gap:10px}.stat-pills{display:none}.form-row{grid-template-columns:1fr}.form-row.three{grid-template-columns:1fr 1fr}.detail-grid{grid-template-columns:1fr}.modal-body{padding:16px 18px}.modal-footer{padding:12px 18px}}
+</style>
+</head>
+<body>
+<header class="no-print">
+  <div class="logo"><div class="logo-icon">⚡</div>Tech<span>OS</span></div>
+  <div class="header-right">
+    <div class="stat-pills">
+      <div class="stat-pill"><div class="stat-dot dot-green"></div><span id="stat-open">0</span></div>
+      <div class="stat-pill"><div class="stat-dot dot-gray"></div><span id="stat-closed">0</span></div>
+    </div>
+    <button class="btn btn-secondary btn-sm" onclick="exportData()">💾 Backup</button>
+    <label class="btn btn-secondary btn-sm" style="cursor:pointer">📂 Restaurar<input type="file" accept=".json" onchange="importData(event)" style="display:none"></label>
+    <button class="btn btn-primary btn-sm" onclick="openNewModal()">＋ Nova O.S.</button>
+  </div>
+</header>
+
+<div class="container no-print">
+  <div class="tabs">
+    <button class="tab active" onclick="setTab('all',this)">Todas</button>
+    <button class="tab" onclick="setTab('open',this)">Abertas</button>
+    <button class="tab" onclick="setTab('closed',this)">Fechadas</button>
+  </div>
+  <div class="filter-bar">
+    <input class="search-input" type="search" id="searchInput" placeholder="🔍  Buscar cliente, O.S., equipamento..." oninput="renderList()">
+    <select class="search-input" id="priorityFilter" onchange="renderList()">
+      <option value="">Todas as prioridades</option>
+      <option value="Alta">Alta</option>
+      <option value="Média">Média</option>
+      <option value="Baixa">Baixa</option>
+    </select>
+  </div>
+  <div class="os-grid" id="osList"></div>
+</div>
+
+<!-- MODAL NOVA/EDITAR -->
+<div class="modal-overlay" id="modalNew">
+  <div class="modal">
+    <div class="modal-header">
+      <div><h2 id="modalTitle">Nova Ordem de Serviço</h2><p id="modalSubtitle">Preencha os dados para abrir a O.S.</p></div>
+      <button class="close-btn" onclick="closeModal('modalNew')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-section">
+        <div class="form-section-title">👤 Dados do Cliente</div>
+        <div class="form-row"><div class="field"><label>Nome completo *</label><input type="text" id="f_nome" placeholder="João da Silva"></div><div class="field"><label>CPF / CNPJ</label><input type="text" id="f_cpf" placeholder="000.000.000-00"></div></div>
+        <div class="form-row"><div class="field"><label>Telefone *</label><input type="tel" id="f_telefone" placeholder="(82) 99999-9999"></div><div class="field"><label>E-mail</label><input type="email" id="f_email" placeholder="cliente@email.com"></div></div>
+        <div class="form-row full"><div class="field"><label>Endereço</label><input type="text" id="f_endereco" placeholder="Rua, número, bairro, cidade"></div></div>
+      </div>
+      <div class="form-section">
+        <div class="form-section-title">🖥️ Equipamento</div>
+        <div class="form-row"><div class="field"><label>Tipo *</label><input type="text" id="f_equipamento" placeholder="Geladeira, Ar-condicionado..."></div><div class="field"><label>Marca / Modelo</label><input type="text" id="f_modelo" placeholder="Electrolux DFN52"></div></div>
+        <div class="form-row three"><div class="field"><label>Nº de série</label><input type="text" id="f_serial" placeholder="SN12345"></div><div class="field"><label>Cor</label><input type="text" id="f_cor" placeholder="Branco, Preto..."></div><div class="field"><label>Voltagem</label><select id="f_voltagem"><option value="">—</option><option value="110V">110V</option><option value="220V">220V</option><option value="Bivolt">Bivolt</option></select></div></div>
+        <div class="form-row three"><div class="field"><label>Prioridade</label><select id="f_prioridade"><option value="Baixa">Baixa</option><option value="Média" selected>Média</option><option value="Alta">Alta</option></select></div><div class="field"><label>Previsão entrega</label><input type="date" id="f_previsao"></div><div class="field"></div></div>
+      </div>
+      <div class="form-section">
+        <div class="form-section-title">🔧 Serviço</div>
+        <div class="form-row full"><div class="field"><label>Defeito relatado *</label><textarea id="f_defeito" placeholder="Descreva o problema relatado pelo cliente..."></textarea></div></div>
+        <div class="form-row full"><div class="field"><label>Diagnóstico técnico</label><textarea id="f_diagnostico" placeholder="Diagnóstico inicial do técnico..."></textarea></div></div>
+        <div class="form-row"><div class="field"><label>Técnico responsável</label><input type="text" id="f_tecnico" placeholder="Nome do técnico"></div><div class="field"><label>Valor estimado (R$)</label><input type="text" id="f_valor" placeholder="0,00"></div></div>
+        <div class="form-row full"><div class="field"><label>Forma de pagamento</label><select id="f_pagamento"><option value="">—</option><option value="Dinheiro">Dinheiro</option><option value="PIX">PIX</option><option value="Cartão Débito">Cartão Débito</option><option value="Cartão Crédito">Cartão Crédito</option><option value="Boleto">Boleto</option><option value="Outro">Outro</option></select></div></div>
+      </div>
+      <div class="form-section">
+        <div class="form-section-title">📝 Observações</div>
+        <div class="form-row full"><div class="field"><label>Observações adicionais</label><textarea id="f_obs" placeholder="Acessórios recebidos, condições do aparelho..."></textarea></div></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modalNew')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveOS()">💾 Salvar O.S.</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL DETALHE -->
+<div class="modal-overlay" id="modalDetail">
+  <div class="modal" style="max-width:680px">
+    <div class="modal-header"><div><h2>Detalhes da O.S.</h2><p id="d_created"></p></div><button class="close-btn" onclick="closeModal('modalDetail')">✕</button></div>
+    <div class="modal-body" id="detailBody"></div>
+    <div class="modal-footer" id="detailFooter"></div>
+  </div>
+</div>
+
+<!-- MODAL FECHAR OS -->
+<div class="modal-overlay" id="modalClose">
+  <div class="modal" style="max-width:480px">
+    <div class="modal-header"><div><h2>Fechar Ordem de Serviço</h2><p>Registre os dados do encerramento</p></div><button class="close-btn" onclick="closeModal('modalClose')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-section">
+        <div class="form-section-title">✅ Resolução</div>
+        <div class="form-row full"><div class="field"><label>Serviço executado *</label><textarea id="c_servico" placeholder="Descreva o que foi feito..."></textarea></div></div>
+        <div class="form-row full"><div class="field"><label>Peças / materiais utilizados</label><textarea id="c_pecas" placeholder="Liste as peças substituídas..." style="min-height:56px"></textarea></div></div>
+        <div class="form-row"><div class="field"><label>Valor final (R$) *</label><input type="text" id="c_valor" placeholder="0,00"></div><div class="field"><label>Data de entrega</label><input type="date" id="c_entrega"></div></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modalClose')">Cancelar</button>
+      <button class="btn btn-primary" onclick="confirmClose()">✅ Fechar O.S.</button>
+    </div>
+  </div>
+</div>
+
+<!-- INSTALL BANNER -->
+<div id="installBanner">
+  <div>⚡</div>
+  <div class="install-text"><strong>Instalar TechOS</strong><span>Adicione à sua tela inicial para acesso rápido</span></div>
+  <button class="btn btn-primary btn-sm" id="installBtn">Instalar</button>
+  <button class="close-btn" onclick="document.getElementById('installBanner').classList.remove('show')">✕</button>
+</div>
+
+<script>
+var orders = JSON.parse(localStorage.getItem('techOS_orders') || '[]');
+var currentTab = 'all';
+var editingId = null;
+var closingId = null;
+var osCounter = parseInt(localStorage.getItem('techOS_counter') || '0');
+
+function saveState() {
+  localStorage.setItem('techOS_orders', JSON.stringify(orders));
+  localStorage.setItem('techOS_counter', String(osCounter));
+}
+
+function nextOSNum() {
+  osCounter++;
+  saveState();
+  var now = new Date();
+  var yy = String(now.getFullYear()).slice(2);
+  var mm = String(now.getMonth()+1).padStart(2,'0');
+  return 'OS'+yy+mm+String(osCounter).padStart(4,'0');
+}
+
+function setTab(tab, el) {
+  currentTab = tab;
+  document.querySelectorAll('.tab').forEach(function(t){ t.classList.remove('active'); });
+  el.classList.add('active');
+  renderList();
+}
+
+function renderList() {
+  var search = (document.getElementById('searchInput').value || '').toLowerCase();
+  var prio = document.getElementById('priorityFilter').value;
+  var list = orders.filter(function(o) {
+    var matchTab = currentTab==='all' || (currentTab==='open' && o.status==='open') || (currentTab==='closed' && o.status==='closed');
+    var matchSearch = !search || o.numero.toLowerCase().includes(search) || o.cliente.nome.toLowerCase().includes(search) || o.equipamento.tipo.toLowerCase().includes(search) || (o.servico.defeito||'').toLowerCase().includes(search);
+    var matchPrio = !prio || o.equipamento.prioridade===prio;
+    return matchTab && matchSearch && matchPrio;
+  }).sort(function(a,b){ return new Date(b.criadoEm)-new Date(a.criadoEm); });
+
+  var open = orders.filter(function(o){ return o.status==='open'; }).length;
+  var closed = orders.filter(function(o){ return o.status==='closed'; }).length;
+  document.getElementById('stat-open').textContent = open+' Aberta'+(open!==1?'s':'');
+  document.getElementById('stat-closed').textContent = closed+' Fechada'+(closed!==1?'s':'');
+
+  var container = document.getElementById('osList');
+  if (!list.length) {
+    container.innerHTML = '<div class="empty-state"><div class="icon">📋</div><h3>Nenhuma O.S. encontrada</h3><p>Clique em "+ Nova O.S." para criar a primeira ordem.</p></div>';
+    return;
+  }
+  var prioMap = {Alta:'priority-alta','Média':'priority-media',Baixa:'priority-baixa'};
+  container.innerHTML = list.map(function(o) {
+    var dateStr = new Date(o.criadoEm).toLocaleDateString('pt-BR');
+    var pc = prioMap[o.equipamento.prioridade] || '';
+    var tecnico = o.servico.tecnico ? '<span>👷 '+o.servico.tecnico+'</span>' : '';
+    var fecharBtn = o.status==='open' ? '<button class="btn btn-warn btn-sm" onclick="openCloseModal(\''+o.id+'\')">Fechar</button>' : '';
+    var statusLabel = o.status==='open' ? '● Aberta' : '✔ Fechada';
+    var modeloStr = o.equipamento.modelo ? ' — '+o.equipamento.modelo : '';
+    return '<div class="os-card status-'+o.status+'" onclick="openDetail(\''+o.id+'\')">'
+      +'<div class="os-number">'+o.numero+'<small>'+dateStr+'</small></div>'
+      +'<div class="os-info"><h3>'+o.cliente.nome+'</h3>'
+      +'<div class="meta"><span>🖥️ '+o.equipamento.tipo+modeloStr+'</span>'
+      +'<span>📞 '+o.cliente.telefone+'</span>'+tecnico+'</div></div>'
+      +'<div class="os-right"><div style="display:flex;gap:6px;align-items:center">'
+      +'<span class="priority-tag '+pc+'">'+o.equipamento.prioridade+'</span>'
+      +'<span class="badge badge-'+o.status+'">'+statusLabel+'</span></div>'
+      +'<div class="card-actions" onclick="event.stopPropagation()">'+fecharBtn
+      +'<button class="btn btn-secondary btn-sm" onclick="printOS(\''+o.id+'\')">🖨</button>'
+      +'<button class="btn btn-danger btn-sm" onclick="deleteOS(\''+o.id+'\')">🗑</button>'
+      +'</div></div></div>';
+  }).join('');
+}
+
+function openNewModal(id) {
+  editingId = id || null;
+  if (id) {
+    var o = orders.find(function(x){ return x.id===id; });
+    document.getElementById('modalTitle').textContent = 'Editar O.S. — '+o.numero;
+    document.getElementById('modalSubtitle').textContent = 'Atualize os dados';
+    document.getElementById('f_nome').value = o.cliente.nome;
+    document.getElementById('f_cpf').value = o.cliente.cpf;
+    document.getElementById('f_telefone').value = o.cliente.telefone;
+    document.getElementById('f_email').value = o.cliente.email;
+    document.getElementById('f_endereco').value = o.cliente.endereco;
+    document.getElementById('f_equipamento').value = o.equipamento.tipo;
+    document.getElementById('f_modelo').value = o.equipamento.modelo;
+    document.getElementById('f_serial').value = o.equipamento.serial;
+    document.getElementById('f_cor').value = o.equipamento.cor || '';
+    document.getElementById('f_voltagem').value = o.equipamento.voltagem || '';
+    document.getElementById('f_prioridade').value = o.equipamento.prioridade;
+    document.getElementById('f_previsao').value = o.equipamento.previsao;
+    document.getElementById('f_defeito').value = o.servico.defeito;
+    document.getElementById('f_diagnostico').value = o.servico.diagnostico;
+    document.getElementById('f_tecnico').value = o.servico.tecnico;
+    document.getElementById('f_valor').value = o.servico.valor;
+    document.getElementById('f_pagamento').value = o.pagamento || '';
+    document.getElementById('f_obs').value = o.obs;
+  } else {
+    document.getElementById('modalTitle').textContent = 'Nova Ordem de Serviço';
+    document.getElementById('modalSubtitle').textContent = 'Preencha os dados para abrir a O.S.';
+    ['nome','cpf','telefone','email','endereco','equipamento','modelo','serial','cor','defeito','diagnostico','tecnico','valor','obs'].forEach(function(f){
+      var el = document.getElementById('f_'+f); if(el) el.value='';
+    });
+    document.getElementById('f_prioridade').value = 'Média';
+    document.getElementById('f_voltagem').value = '';
+    document.getElementById('f_pagamento').value = '';
+    var d = new Date(); d.setDate(d.getDate()+7);
+    document.getElementById('f_previsao').value = d.toISOString().slice(0,10);
+  }
+  document.getElementById('modalNew').classList.add('show');
+}
+
+function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+
+function saveOS() {
+  var nome = document.getElementById('f_nome').value.trim();
+  var telefone = document.getElementById('f_telefone').value.trim();
+  var equip = document.getElementById('f_equipamento').value.trim();
+  var defeito = document.getElementById('f_defeito').value.trim();
+  if (!nome||!telefone||!equip||!defeito) { showToast('⚠️ Preencha os campos obrigatórios!'); return; }
+  if (editingId) {
+    var idx = orders.findIndex(function(x){ return x.id===editingId; });
+    var o = orders[idx];
+    o.cliente = {nome:nome,cpf:document.getElementById('f_cpf').value,telefone:telefone,email:document.getElementById('f_email').value,endereco:document.getElementById('f_endereco').value};
+    o.equipamento = {tipo:equip,modelo:document.getElementById('f_modelo').value,serial:document.getElementById('f_serial').value,cor:document.getElementById('f_cor').value,voltagem:document.getElementById('f_voltagem').value,prioridade:document.getElementById('f_prioridade').value,previsao:document.getElementById('f_previsao').value};
+    o.servico = {defeito:defeito,diagnostico:document.getElementById('f_diagnostico').value,tecnico:document.getElementById('f_tecnico').value,valor:document.getElementById('f_valor').value};
+    o.pagamento = document.getElementById('f_pagamento').value;
+    o.obs = document.getElementById('f_obs').value;
+    showToast('✅ O.S. atualizada!');
+  } else {
+    var order = {
+      id: Date.now().toString(),
+      numero: nextOSNum(),
+      status: 'open',
+      criadoEm: new Date().toISOString(),
+      fechadoEm: null,
+      cliente: {nome:nome,cpf:document.getElementById('f_cpf').value,telefone:telefone,email:document.getElementById('f_email').value,endereco:document.getElementById('f_endereco').value},
+      equipamento: {tipo:equip,modelo:document.getElementById('f_modelo').value,serial:document.getElementById('f_serial').value,cor:document.getElementById('f_cor').value,voltagem:document.getElementById('f_voltagem').value,prioridade:document.getElementById('f_prioridade').value,previsao:document.getElementById('f_previsao').value},
+      servico: {defeito:defeito,diagnostico:document.getElementById('f_diagnostico').value,tecnico:document.getElementById('f_tecnico').value,valor:document.getElementById('f_valor').value},
+      pagamento: document.getElementById('f_pagamento').value,
+      fechamento: null,
+      obs: document.getElementById('f_obs').value
+    };
+    orders.push(order);
+    showToast('✅ O.S. '+order.numero+' criada!');
+  }
+  saveState(); closeModal('modalNew'); renderList();
+}
+
+function openDetail(id) {
+  var o = orders.find(function(x){ return x.id===id; });
+  var prioMap = {Alta:'priority-alta','Média':'priority-media',Baixa:'priority-baixa'};
+  document.getElementById('d_created').textContent = 'Aberta em '+new Date(o.criadoEm).toLocaleString('pt-BR');
+  var previsao = o.equipamento.previsao ? new Date(o.equipamento.previsao+'T00:00:00').toLocaleDateString('pt-BR') : '—';
+  var html = '<div class="detail-header"><div><div class="detail-os-num">'+o.numero+'</div>'
+    +'<div style="display:flex;gap:6px;margin-top:6px;align-items:center">'
+    +'<span class="badge badge-'+o.status+'">'+(o.status==='open'?'● Aberta':'✔ Fechada')+'</span>'
+    +'<span class="priority-tag '+(prioMap[o.equipamento.prioridade]||'')+'">'+o.equipamento.prioridade+'</span>'
+    +'</div></div></div>'
+    +'<div class="detail-section"><div class="detail-section-title">👤 Cliente</div><div class="detail-grid">'
+    +'<div class="detail-item"><label>Nome</label><span>'+o.cliente.nome+'</span></div>'
+    +'<div class="detail-item"><label>Telefone</label><span>'+(o.cliente.telefone||'—')+'</span></div>'
+    +'<div class="detail-item"><label>CPF/CNPJ</label><span>'+(o.cliente.cpf||'—')+'</span></div>'
+    +'<div class="detail-item"><label>E-mail</label><span>'+(o.cliente.email||'—')+'</span></div>'
+    +'<div class="detail-item full"><label>Endereço</label><span>'+(o.cliente.endereco||'—')+'</span></div>'
+    +'</div></div>'
+    +'<div class="detail-section"><div class="detail-section-title">🖥️ Equipamento</div><div class="detail-grid">'
+    +'<div class="detail-item"><label>Tipo</label><span>'+o.equipamento.tipo+'</span></div>'
+    +'<div class="detail-item"><label>Marca/Modelo</label><span>'+(o.equipamento.modelo||'—')+'</span></div>'
+    +'<div class="detail-item"><label>Nº Série</label><span>'+(o.equipamento.serial||'—')+'</span></div>'
+    +'<div class="detail-item"><label>Cor</label><span>'+(o.equipamento.cor||'—')+'</span></div>'
+    +'<div class="detail-item"><label>Voltagem</label><span>'+(o.equipamento.voltagem||'—')+'</span></div>'
+    +'<div class="detail-item"><label>Previsão</label><span>'+previsao+'</span></div>'
+    +'</div></div>'
+    +'<div class="detail-section"><div class="detail-section-title">🔧 Serviço</div><div class="detail-grid">'
+    +'<div class="detail-item full"><label>Defeito relatado</label><span>'+o.servico.defeito+'</span></div>'
+    +'<div class="detail-item full"><label>Diagnóstico</label><span>'+(o.servico.diagnostico||'—')+'</span></div>'
+    +'<div class="detail-item"><label>Técnico</label><span>'+(o.servico.tecnico||'—')+'</span></div>'
+    +'<div class="detail-item"><label>Valor estimado</label><span>'+(o.servico.valor?'R$ '+o.servico.valor:'—')+'</span></div>'
+    +'<div class="detail-item"><label>Pagamento</label><span>'+(o.pagamento||'—')+'</span></div>'
+    +'</div></div>';
+  if (o.obs) html += '<div class="detail-section"><div class="detail-section-title">📝 Observações</div><p style="font-size:.85rem">'+o.obs+'</p></div>';
+  if (o.fechamento) html += '<div class="detail-section" style="border-color:rgba(0,212,170,.3)"><div class="detail-section-title">✅ Encerramento</div><div class="detail-grid">'
+    +'<div class="detail-item full"><label>Serviço executado</label><span>'+o.fechamento.servico+'</span></div>'
+    +(o.fechamento.pecas?'<div class="detail-item full"><label>Peças</label><span>'+o.fechamento.pecas+'</span></div>':'')
+    +'<div class="detail-item"><label>Valor final</label><span style="color:var(--accent);font-weight:700">R$ '+o.fechamento.valor+'</span></div>'
+    +'<div class="detail-item"><label>Data entrega</label><span>'+(o.fechamento.entrega?new Date(o.fechamento.entrega+'T00:00:00').toLocaleDateString('pt-BR'):'—')+'</span></div>'
+    +'</div></div>';
+  document.getElementById('detailBody').innerHTML = html;
+  document.getElementById('detailFooter').innerHTML =
+    '<button class="btn btn-secondary" onclick="printOS(\''+o.id+'\')">🖨️ Imprimir</button>'
+    +'<button class="btn btn-secondary" onclick="openNewModal(\''+o.id+'\');closeModal(\'modalDetail\')">✏️ Editar</button>'
+    +(o.status==='open'?'<button class="btn btn-warn" onclick="openCloseModal(\''+o.id+'\');closeModal(\'modalDetail\')">Fechar O.S.</button>':'')
+    +'<button class="btn btn-secondary" onclick="closeModal(\'modalDetail\')">Voltar</button>';
+  document.getElementById('modalDetail').classList.add('show');
+}
+
+function openCloseModal(id) {
+  closingId = id;
+  document.getElementById('c_servico').value = '';
+  document.getElementById('c_pecas').value = '';
+  document.getElementById('c_valor').value = '';
+  document.getElementById('c_entrega').value = new Date().toISOString().slice(0,10);
+  document.getElementById('modalClose').classList.add('show');
+}
+
+function confirmClose() {
+  var servico = document.getElementById('c_servico').value.trim();
+  var valor = document.getElementById('c_valor').value.trim();
+  if (!servico||!valor) { showToast('⚠️ Informe o serviço e o valor!'); return; }
+  var idx = orders.findIndex(function(x){ return x.id===closingId; });
+  orders[idx].status = 'closed';
+  orders[idx].fechadoEm = new Date().toISOString();
+  orders[idx].fechamento = {servico:servico,pecas:document.getElementById('c_pecas').value,valor:valor,entrega:document.getElementById('c_entrega').value};
+  saveState(); closeModal('modalClose'); renderList();
+  showToast('✅ O.S. '+orders[idx].numero+' fechada!');
+}
+
+function deleteOS(id) {
+  if (!confirm('Excluir esta O.S.? A ação não pode ser desfeita.')) return;
+  orders = orders.filter(function(x){ return x.id!==id; });
+  saveState(); renderList();
+  showToast('🗑️ O.S. excluída.');
+}
+
+function printOS(id) {
+  var o = orders.find(function(x){ return x.id===id; });
+  var created = new Date(o.criadoEm).toLocaleDateString('pt-BR');
+  var previsao = o.equipamento.previsao ? new Date(o.equipamento.previsao+'T00:00:00').toLocaleDateString('pt-BR') : '___/___/______';
+  var statusLabel = o.status==='open' ? 'ABERTA' : 'FECHADA';
+  var pecas = o.fechamento&&o.fechamento.pecas ? o.fechamento.pecas : '';
+  var valorFinal = o.fechamento&&o.fechamento.valor ? o.fechamento.valor : '';
+  var servicoExec = o.fechamento&&o.fechamento.servico ? o.fechamento.servico : '';
+  var pagamento = o.pagamento || '';
+
+  var logoSVG = '<svg width="155" height="58" viewBox="0 0 155 58" xmlns="http://www.w3.org/2000/svg">'
+    +'<rect width="155" height="58" rx="6" fill="#0a1420"/>'
+    +'<circle cx="30" cy="29" r="21" fill="#0a2040"/>'
+    +'<line x1="30" y1="11" x2="30" y2="47" stroke="#60c8ff" stroke-width="2.5"/>'
+    +'<line x1="13" y1="20" x2="47" y2="38" stroke="#60c8ff" stroke-width="2.5"/>'
+    +'<line x1="47" y1="20" x2="13" y2="38" stroke="#60c8ff" stroke-width="2.5"/>'
+    +'<line x1="21" y1="13" x2="25" y2="20" stroke="#60c8ff" stroke-width="1.8"/>'
+    +'<line x1="21" y1="13" x2="16" y2="17" stroke="#60c8ff" stroke-width="1.8"/>'
+    +'<line x1="39" y1="13" x2="35" y2="20" stroke="#60c8ff" stroke-width="1.8"/>'
+    +'<line x1="39" y1="13" x2="44" y2="17" stroke="#60c8ff" stroke-width="1.8"/>'
+    +'<line x1="21" y1="45" x2="25" y2="38" stroke="#60c8ff" stroke-width="1.8"/>'
+    +'<line x1="21" y1="45" x2="16" y2="41" stroke="#60c8ff" stroke-width="1.8"/>'
+    +'<line x1="39" y1="45" x2="35" y2="38" stroke="#60c8ff" stroke-width="1.8"/>'
+    +'<line x1="39" y1="45" x2="44" y2="41" stroke="#60c8ff" stroke-width="1.8"/>'
+    +'<circle cx="30" cy="29" r="3" fill="#60c8ff"/>'
+    +'<line x1="58" y1="8" x2="58" y2="50" stroke="#1a6fff" stroke-width="1.5"/>'
+    +'<text x="65" y="25" font-family="Arial" font-weight="bold" font-size="14" fill="white">TEC SERVICE</text>'
+    +'<text x="65" y="38" font-family="Arial" font-size="9.5" fill="#60c8ff">Refrigera\u00e7\u00e3o</text>'
+    +'<rect x="0" y="54" width="155" height="4" fill="#1a6fff"/>'
+    +'</svg>';
+
+  function payOpt(label) {
+    var sel = pagamento===label ? ' style="background:#003399;color:#fff;border-color:#003399"' : '';
+    return '<span class="pay-opt"'+sel+'>'+label+'</span>';
+  }
+
+  function buildCopy(label) {
+    return '<div class="os-page">'
+      +'<div class="copy-label">'+label+'</div>'
+      +'<div class="os-header"><div class="logo-area">'+logoSVG+'</div>'
+      +'<div class="company-info">'
+      +'<div class="os-title">ORDEM DE SERVI\u00c7O</div>'
+      +'<div class="company-name">TEC SERVICE REFRIGERA\u00c7\u00c3O</div>'
+      +'<div class="company-detail"><b>TEL:</b> (82) 99610-7693</div>'
+      +'<div class="company-detail"><b>END:</b> R. Somaia Saffady, n 114 - Qd. 06, Lt. 134</div>'
+      +'<div class="company-detail">Tabuleiro do Martins - CEP: 57.081-860 - Macei\u00f3/AL</div>'
+      +'</div></div>'
+      +'<div class="meta-row">'
+      +'<div class="meta-cell"><div class="meta-label">N DA ORDEM</div><div class="meta-val">'+o.numero+'</div></div>'
+      +'<div class="meta-cell"><div class="meta-label">DATA EMISS\u00c3O</div><div class="meta-val">'+created+'</div></div>'
+      +'<div class="meta-cell"><div class="meta-label">DATA ENTREGA</div><div class="meta-val">'+previsao+'</div></div>'
+      +'<div class="meta-cell"><div class="meta-label">STATUS</div><div class="meta-val" style="color:'+(o.status==='open'?'#0066cc':'#555')+';font-weight:700">'+statusLabel+'</div></div>'
+      +'</div>'
+      +'<div class="section-title">DADOS DO CLIENTE</div>'
+      +'<div class="field-row"><div class="field" style="flex:2"><div class="field-label">NOME COMPLETO</div><div class="field-val">'+o.cliente.nome+'</div></div><div class="field" style="flex:1"><div class="field-label">TELEFONE</div><div class="field-val">'+(o.cliente.telefone||'—')+'</div></div></div>'
+      +'<div class="field-row"><div class="field" style="flex:1"><div class="field-label">CPF / CNPJ</div><div class="field-val">'+(o.cliente.cpf||'—')+'</div></div><div class="field" style="flex:1.5"><div class="field-label">E-MAIL</div><div class="field-val">'+(o.cliente.email||'—')+'</div></div></div>'
+      +'<div class="field-row"><div class="field" style="flex:1"><div class="field-label">ENDERE\u00c7O COMPLETO</div><div class="field-val">'+(o.cliente.endereco||'—')+'</div></div></div>'
+      +'<div class="section-title">EQUIPAMENTO</div>'
+      +'<div class="field-row"><div class="field" style="flex:1"><div class="field-label">TIPO</div><div class="field-val">'+o.equipamento.tipo+'</div></div><div class="field" style="flex:1.5"><div class="field-label">MARCA / MODELO</div><div class="field-val">'+(o.equipamento.modelo||'—')+'</div></div></div>'
+      +'<div class="field-row"><div class="field" style="flex:1.5"><div class="field-label">N DE S\u00c9RIE</div><div class="field-val">'+(o.equipamento.serial||'—')+'</div></div><div class="field" style="flex:1"><div class="field-label">COR</div><div class="field-val">'+(o.equipamento.cor||'—')+'</div></div><div class="field" style="flex:1"><div class="field-label">VOLTAGEM</div><div class="field-val">'+(o.equipamento.voltagem||'—')+'</div></div></div>'
+      +'<div class="section-title">SERVI\u00c7O</div>'
+      +'<div class="field-row"><div class="field" style="flex:1"><div class="field-label">DEFEITO RELATADO PELO CLIENTE</div><div class="field-val">'+o.servico.defeito+'</div></div></div>'
+      +'<div class="field-row"><div class="field" style="flex:1"><div class="field-label">DIAGN\u00d3STICO T\u00c9CNICO</div><div class="field-val">'+(o.servico.diagnostico||'—')+'</div></div></div>'
+      +'<div class="field-row"><div class="field" style="flex:1"><div class="field-label">SERVI\u00c7OS EXECUTADOS</div><div class="field-val">'+(servicoExec||'—')+'</div></div></div>'
+      +'<div class="field-row"><div class="field" style="flex:2"><div class="field-label">T\u00c9CNICO RESPONS\u00c1VEL</div><div class="field-val">'+(o.servico.tecnico||'—')+'</div></div><div class="field" style="flex:1"><div class="field-label">VALOR ESTIMADO (R$)</div><div class="field-val">'+(o.servico.valor?'R$ '+o.servico.valor:'—')+'</div></div><div class="field" style="flex:1"><div class="field-label">VALOR FINAL (R$)</div><div class="field-val" style="font-weight:700;color:#003399">'+(valorFinal?'R$ '+valorFinal:'—')+'</div></div></div>'
+      +'<div class="section-title">PE\u00c7AS / MATERIAIS UTILIZADOS</div>'
+      +'<table class="pecas-table"><thead><tr><th style="width:8%">QTD</th><th>DESCRI\u00c7\u00c3O</th><th style="width:14%">UNIT. (R$)</th><th style="width:12%">DESCONTO</th><th style="width:14%">TOTAL (R$)</th></tr></thead>'
+      +'<tbody><tr><td></td><td>'+pecas+'</td><td></td><td></td><td></td></tr>'
+      +'<tr><td></td><td></td><td></td><td></td><td></td></tr>'
+      +'<tr><td></td><td></td><td></td><td></td><td></td></tr>'
+      +'<tr><td></td><td></td><td></td><td></td><td></td></tr></tbody></table>'
+      +'<div class="bottom-row">'
+      +'<div class="pagamento-box"><div class="section-title" style="margin-top:0">FORMA DE PAGAMENTO</div>'
+      +'<div class="payment-options">'+payOpt('Dinheiro')+payOpt('PIX')+payOpt('Cart\u00e3o D\u00e9bito')+payOpt('Cart\u00e3o Cr\u00e9dito')+payOpt('Boleto')+payOpt('Outro')+'</div></div>'
+      +'<div class="totais-box">'
+      +'<div class="total-row"><span>SUBTOTAL PE\u00c7AS:</span><span>R$ ___________</span></div>'
+      +'<div class="total-row"><span>M\u00c3O DE OBRA:</span><span>R$ '+(o.servico.valor||'___________')+'</span></div>'
+      +'<div class="total-row"><span>DESCONTOS:</span><span>R$ ___________</span></div>'
+      +'<div class="total-row total-geral"><span>TOTAL GERAL:</span><span>R$ '+(valorFinal||'___________')+'</span></div>'
+      +'</div></div>'
+      +'<div class="section-title">OBSERVA\u00c7\u00d5ES / GARANTIA</div>'
+      +'<div class="obs-box">'+(o.obs||'')+'</div>'
+      +'<div class="sign-row"><div class="sign-line"><div class="sign-blank"></div><div class="sign-label">Assinatura do T\u00e9cnico Respons\u00e1vel</div></div><div class="sign-line"><div class="sign-blank"></div><div class="sign-label">Assinatura do Cliente</div></div></div>'
+      +'<div class="rodape">Este documento \u00e9 uma Ordem de Servi\u00e7o e n\u00e3o tem valor fiscal \u00a0\u2014\u00a0 TEC Service Refrigera\u00e7\u00e3o</div>'
+      +'</div>';
+  }
+
+  var css = '*{margin:0;padding:0;box-sizing:border-box}body{font-family:Arial,sans-serif;font-size:11px;color:#000;background:#fff}'
+    +'.os-page{padding:7mm 9mm;max-width:210mm;margin:0 auto;page-break-after:always}'
+    +'.copy-label{text-align:center;font-size:8px;font-weight:700;text-transform:uppercase;border:1px solid #000;padding:3px;margin-bottom:7px;letter-spacing:2px}'
+    +'.os-header{display:flex;align-items:flex-start;gap:12px;border:1px solid #ccc;border-radius:6px;padding:7px;margin-bottom:5px;background:#f8faff}'
+    +'.logo-area{flex-shrink:0}.company-info{flex:1}'
+    +'.os-title{font-size:16px;font-weight:800;color:#003399;letter-spacing:1px}'
+    +'.company-name{font-size:11px;font-weight:700;color:#0055cc;margin-bottom:2px}'
+    +'.company-detail{font-size:9px;color:#333;line-height:1.5}'
+    +'.meta-row{display:flex;border:1px solid #ccc;border-radius:4px;overflow:hidden;margin-bottom:4px}'
+    +'.meta-cell{flex:1;padding:3px 5px;border-right:1px solid #ddd}.meta-cell:last-child{border-right:none}'
+    +'.meta-label{font-size:7px;text-transform:uppercase;color:#666;font-weight:700}'
+    +'.meta-val{font-size:10px;font-weight:700;margin-top:1px}'
+    +'.section-title{background:#003399;color:#fff;font-size:8px;font-weight:700;text-transform:uppercase;padding:3px 6px;margin:4px 0 3px;border-radius:2px;letter-spacing:.5px}'
+    +'.field-row{display:flex;gap:3px;margin-bottom:3px}'
+    +'.field{border:1px solid #ddd;border-radius:3px;padding:3px 5px;min-height:20px}'
+    +'.field-label{font-size:6.5px;text-transform:uppercase;color:#888;font-weight:700}'
+    +'.field-val{font-size:9.5px;font-weight:600;margin-top:1px;min-height:11px}'
+    +'.pecas-table{width:100%;border-collapse:collapse;margin-bottom:4px;font-size:8.5px}'
+    +'.pecas-table th{background:#003399;color:#fff;padding:3px 5px;text-align:left;font-size:7.5px}'
+    +'.pecas-table td{border:1px solid #ddd;padding:4px 5px;height:15px}'
+    +'.bottom-row{display:flex;gap:5px;margin-bottom:4px}'
+    +'.pagamento-box{flex:1.3;border:1px solid #ddd;border-radius:3px;padding:3px 5px}'
+    +'.payment-options{display:flex;flex-wrap:wrap;gap:3px;margin-top:3px}'
+    +'.pay-opt{border:1px solid #aaa;border-radius:3px;padding:2px 5px;font-size:7.5px;font-weight:600}'
+    +'.totais-box{flex:1;border:1px solid #ddd;border-radius:3px;padding:3px 5px}'
+    +'.total-row{display:flex;justify-content:space-between;font-size:8px;padding:2px 0;border-bottom:1px solid #eee}'
+    +'.total-geral{font-weight:800;font-size:9px;color:#003399;border-bottom:none;margin-top:2px}'
+    +'.obs-box{border:1px solid #ddd;border-radius:3px;min-height:22px;padding:3px 5px;font-size:9px;margin-bottom:6px}'
+    +'.sign-row{display:flex;gap:30px;margin:8px 0 5px}'
+    +'.sign-line{flex:1;text-align:center}'
+    +'.sign-blank{border-bottom:1px solid #000;height:18px;margin-bottom:3px}'
+    +'.sign-label{font-size:7.5px;color:#444}'
+    +'.rodape{text-align:center;font-size:7px;color:#666;border-top:1px solid #ddd;padding-top:3px}'
+    +'hr.dashed{border:none;border-top:2px dashed #bbb;margin:5px 0}'
+    +'@media print{@page{margin:4mm}body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}';
+
+  var w = window.open('','_blank','width=900,height=700');
+  var html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>OS '+o.numero+' - TEC Service</title><style>'+css+'</style></head><body>'
+    +buildCopy('VIA DA EMPRESA')
+    +'<hr class="dashed">'
+    +buildCopy('VIA DO CLIENTE')
+    +'</body></html>';
+  w.document.write(html);
+  w.document.close();
+  w.onload = function(){ w.print(); };
+}
+
+function exportData() {
+  if (!orders.length) { showToast('⚠️ Nenhuma O.S. para exportar!'); return; }
+  var backup = {versao:'1.0',exportadoEm:new Date().toISOString(),totalOS:orders.length,contador:osCounter,ordens:orders};
+  var blob = new Blob([JSON.stringify(backup,null,2)],{type:'application/json'});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  var data = new Date().toLocaleDateString('pt-BR').replace(/\//g,'-');
+  a.href=url; a.download='techos-backup-'+data+'.json'; a.click();
+  URL.revokeObjectURL(url);
+  showToast('✅ Backup exportado!');
+}
+
+function importData(event) {
+  var file = event.target.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      var backup = JSON.parse(e.target.result);
+      if (!backup.ordens||!Array.isArray(backup.ordens)) { showToast('❌ Arquivo inválido!'); return; }
+      if (!confirm('Encontradas '+backup.ordens.length+' ordens.\n\nIsso vai SUBSTITUIR todos os dados atuais. Continuar?')) { event.target.value=''; return; }
+      orders = backup.ordens;
+      osCounter = backup.contador || orders.length;
+      saveState(); renderList();
+      showToast('✅ '+backup.ordens.length+' O.S. restauradas!');
+    } catch(e) { showToast('❌ Erro ao ler o arquivo!'); }
+    event.target.value='';
+  };
+  reader.readAsText(file);
+}
+
+function showToast(msg) {
+  var t = document.createElement('div'); t.className='toast'; t.textContent=msg;
+  document.body.appendChild(t);
+  setTimeout(function(){ t.style.opacity='0'; },2200);
+  setTimeout(function(){ t.remove(); },2600);
+}
+
+var deferredPrompt = null;
+window.addEventListener('beforeinstallprompt',function(e){
+  e.preventDefault(); deferredPrompt=e;
+  document.getElementById('installBanner').classList.add('show');
+});
+document.getElementById('installBtn').addEventListener('click',function(){
+  if(!deferredPrompt) return;
+  deferredPrompt.prompt();
+  deferredPrompt.userChoice.then(function(r){
+    if(r.outcome==='accepted') showToast('✅ TechOS instalado!');
+    deferredPrompt=null;
+    document.getElementById('installBanner').classList.remove('show');
+  });
+});
+window.addEventListener('appinstalled',function(){
+  document.getElementById('installBanner').classList.remove('show');
+});
+
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('./sw.js');
+}
+
+renderList();
+</script>
+</body>
+</html>
